@@ -8,22 +8,94 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity"
     >
-
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <fragment
-            android:id="@+id/weather_fragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:name="com.example.weatherapp.WeatherFragment"
-            tools:layout="@layout/fragment_weather"/>
+        <ImageButton
+            android:id="@+id/add_city"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="10dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/add_button_description"
+            android:src="@drawable/baseline_plus" />
+
+        <ImageView
+            android:id="@+id/weather_icon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+
+            android:src="@drawable/baseline_sunny" />
+
+        <TextView
+            android:id="@+id/degrees"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="70sp"
+            android:text="0°"
+            android:textColor="@color/black"
+            android:layout_gravity="center"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sunny"
+            android:layout_gravity="center"
+            android:layout_margin="10dp"
+            android:textSize="30sp"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/wind_speed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wind Speed: 0 km/h"
+            android:layout_margin="5dp"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:textSize="25sp"
+            />
+
+        <TextView
+            android:id="@+id/wind_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="Wind Direction: South"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:textSize="25sp"/>
+
+        <TextView
+            android:id="@+id/last_update"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:text="Updated on: 12:00"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:textSize="25sp"/>
+
+        <TextView
+            android:id="@+id/data_provided"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Data provided by: Open-Meteo"
+            android:textColor="@color/black"
+            android:layout_gravity="center"
+            android:textSize="25sp"/>
 
 
     </LinearLayout>
 
+    </ScrollView>
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"

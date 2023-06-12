@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.widget.ImageButton;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        List<String> values = Arrays.asList("Paris", "London", "Lisbon","Kiev","Moscow","Prague","Rome","Copenhagen","Bucharest");
+        List<String> values = Arrays.asList("Paris");
 
         mRecyclerView = (RecyclerView) findViewById(R.id.list_cities);
 
