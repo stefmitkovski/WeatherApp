@@ -62,9 +62,9 @@ public class WeatherWorker extends Worker {
                 if (cities == null || cities.isEmpty()) {
                     return Result.failure();
                 }
-                String value = fetchWeatherDataByString(cities);
-                if (value != null && !value.isEmpty()){
-                    Data outputData = new Data.Builder().putString("key",value).build();
+                String[] value = fetchWeatherDataByString(cities);
+                if (value.length != 0){
+                    Data outputData = new Data.Builder().putStringArray("key",value).build();
                     return Result.success(outputData);
                 }else{
                     Log.d(TAG,"Value is null or is empty");
@@ -140,7 +140,7 @@ public class WeatherWorker extends Worker {
 
     }
 
-    private String fetchWeatherDataByString(String cities){
+    private String[] fetchWeatherDataByString(String cities){
         String[]list_cities = cities.split(",");
         if(list_cities.length == 0){
             Log.d(TAG,"No cities in the array");
@@ -172,6 +172,7 @@ public class WeatherWorker extends Worker {
                     }
                 }
                 Log.d(TAG,"lat: " + latitude + " lon: " + longitude);
+                list_cities[i] = fetchWeatherDataByLocation(latitude,longitude);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -181,7 +182,7 @@ public class WeatherWorker extends Worker {
             closeDatabase(database);
         }
 
-        return "lat: " + latitude + " lon: " + longitude;
+        return list_cities;
     }
 
     private SQLiteDatabase openDatabase() {

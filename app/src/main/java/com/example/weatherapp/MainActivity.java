@@ -37,7 +37,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        List<String> cities = Arrays.asList("Paris","London");
+        List<String> cities = Arrays.asList("Paris","London","Sydney");
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.list_cities);
+
+        mRecyclerView.setHasFixedSize(true);
+
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
         final WorkManager mWorkManager = WorkManager.getInstance(getApplication());
 
@@ -86,23 +94,18 @@ public class MainActivity extends AppCompatActivity {
         mWorkManager.getWorkInfosForUniqueWorkLiveData("weather_cities").observe(MainActivity.this, workInfos -> {
             if(workInfos.get(0).getState() == WorkInfo.State.SUCCEEDED){
                 Data outputData = workInfos.get(0).getOutputData();
-                String outputValue = outputData.getString("key");
-                Log.d("MAIN","CITIES DONE: " + outputValue);
+                String[] outputValue = outputData.getStringArray("key");
+
+                cityAdapter = new CityAdapter(cities, R.layout.city_row, this,outputValue);
+
+                mRecyclerView.setAdapter(cityAdapter);
+
+                Log.d("MAIN","CITIES DONE");
             }
             Log.d("MAIN",workInfos.get(0).getState().toString());
         });
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.list_cities);
 
-        mRecyclerView.setHasFixedSize(true);
-
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-
-        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        cityAdapter = new CityAdapter(cities, R.layout.city_row, this);
-
-        mRecyclerView.setAdapter(cityAdapter);
     }
 
     private void updateWeather(String temp, Double wind_speed, Integer wind_direction, Integer weather_code,Integer day) {
