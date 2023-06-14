@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -11,12 +12,28 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class WeatherWorker extends Worker {
 
-    private static final String TAG = "WEATHER_WORKER";
     SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Location Weather", Context.MODE_PRIVATE);
+    private static final String TAG = "WEATHER_WORKER";
     private static final String DATABASE_NAME = "cities.db";
-    public final static String DATABASE_PATH = "/data/data/com.example.weatherapp/databases/";
+    public static final String DATABASE_PATH = "/data/data/com.example.weatherapp/databases/";
+
+    // Example URL:
+    // https://api.open-meteo.com/v1/forecast?
+    // latitude=52.52&longitude=13.41
+    // &current_weather=true
+    private static final String API_URL = "https://api.open-meteo.com/v1/forecast?";
     public WeatherWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
     }
@@ -31,7 +48,9 @@ public class WeatherWorker extends Worker {
         switch (runType){
             case "weather_location":
                 Log.d(TAG,"CURRENT LOCATION");
-                String weatherData = fetchWeatherDataByLocation(1,2);
+                Double latitude = getInputData().getDouble("latitude",0);
+                Double longitude = getInputData().getDouble("longitude",0);
+                String weatherData = fetchWeatherDataByLocation(latitude,longitude);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("key", weatherData);
                 editor.apply();
@@ -56,9 +75,69 @@ public class WeatherWorker extends Worker {
     }
 
 
-    private String fetchWeatherDataByLocation(double lat, double lon) {
-        // Simulate fetching weather data
-        return "Sunny";
+    static String fetchWeatherDataByLocation(double lat, double lon) {
+        HttpURLConnection urlConnection = null;
+        BufferedReader reader = null;
+        String weatherJSONString = null;
+
+        try {
+            Uri builtURI = Uri.parse(API_URL).buildUpon()
+                    .appendQueryParameter("latitude", String.valueOf(lat))
+                    .appendQueryParameter("longitude",String.valueOf(lon))
+                    .appendQueryParameter("current_weather","true")
+                    .build();
+
+            URL requestURL = new URL(builtURI.toString());
+
+            urlConnection = (HttpURLConnection) requestURL.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            InputStream inputStream = urlConnection.getInputStream();
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            StringBuilder builder = new StringBuilder();
+
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                builder.append(line);
+                builder.append("\n");
+            }
+
+            if (builder.length() == 0) {
+                // Stream was empty.  Exit without parsing.
+                return null;
+            }
+
+            JSONObject jsonObject = new JSONObject(builder.toString()).getJSONObject("current_weather");
+            weatherJSONString = jsonObject.toString();
+
+        } catch (IOException e) {
+            Log.d(TAG, "Can't connect to the URL");
+            e.printStackTrace();
+            return null;
+        } catch (JSONException e) {
+            Log.d(TAG, "Can't parse JSON data");
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        Log.d(TAG,weatherJSONString);
+        return weatherJSONString;
+
     }
 
     private String fetchWeatherDataByString(String cities){
