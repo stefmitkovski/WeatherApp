@@ -15,6 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
@@ -28,6 +31,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
         public TextView city_name;
         public TextView city_weather;
         public TextView city_temperature;
+        public TextView city_last_updated;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -35,6 +39,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
             city_name = (TextView) itemView.findViewById(R.id.city_name);
             city_weather = (TextView) itemView.findViewById(R.id.city_weather);
             city_temperature = (TextView) itemView.findViewById(R.id.city_temperature);
+            city_last_updated = (TextView) itemView.findViewById(R.id.city_update);
         }
     }
 
@@ -57,9 +62,18 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
         String entry = cities.get(position);
         holder.city_name.setText(entry);
 
+
         try {
             JSONObject jsonObject = new JSONObject(data[position]);
             holder.city_temperature.setText(jsonObject.getString("temperature")+"°");
+
+            // Time
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            Date date = null;
+            date = inputFormat.parse(jsonObject.getString("time"));
+            SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm");
+            String timeString = outputFormat.format(date);
+            holder.city_last_updated.setText("Last updated on: " + timeString);
             switch (jsonObject.getInt("weathercode")){
                 case 2:
                     holder.icon.setImageResource(R.drawable.baseline_cloudy);
@@ -86,8 +100,9 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
                         holder.city_weather.setText("Clear Sky");
                     }
             }
-
         } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
             throw new RuntimeException(e);
         }
 

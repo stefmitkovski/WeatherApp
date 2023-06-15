@@ -23,7 +23,10 @@ import androidx.work.WorkManager;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -71,7 +74,8 @@ public class MainActivity extends AppCompatActivity {
                             Integer wind_direction = jsonObject.getInt("winddirection");
                             Integer weather_code = jsonObject.getInt("weathercode");
                             Integer day = jsonObject.getInt("is_day");
-                            updateWeather(temp,wind_speed,wind_direction,weather_code,day);
+                            String time = jsonObject.getString("time");
+                            updateWeather(temp,wind_speed,wind_direction,weather_code,day,time);
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
@@ -108,12 +112,31 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void updateWeather(String temp, Double wind_speed, Integer wind_direction, Integer weather_code,Integer day) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+    }
+
+    private void updateWeather(String temp, Double wind_speed, Integer wind_direction, Integer weather_code, Integer day, String time) {
         ImageView weather_icon = findViewById(R.id.weather_icon);
         TextView degrees = findViewById(R.id.degrees);
         TextView type = findViewById(R.id.weather_type);
         TextView speed = findViewById(R.id.wind_speed);
         TextView direction = findViewById(R.id.wind_direction);
+        TextView last_update = findViewById(R.id.last_update);
+
+        // Time
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            Date date = null;
+            date = inputFormat.parse(time);
+            SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm");
+            String timeString = outputFormat.format(date);
+            last_update.setText("Last updated on: " + timeString);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
         degrees.setText(temp+"°");
         speed.setText("Wind Speed: " + wind_speed + " km/h");
