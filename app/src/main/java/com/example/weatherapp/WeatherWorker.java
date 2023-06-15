@@ -1,14 +1,22 @@
 package com.example.weatherapp;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 import androidx.work.Data;
+import androidx.work.ForegroundInfo;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
@@ -47,13 +55,14 @@ public class WeatherWorker extends Worker {
 
         switch (runType){
             case "weather_location":
-                Log.d(TAG,"CURRENT LOCATION");
                 Double latitude = getInputData().getDouble("latitude",0);
                 Double longitude = getInputData().getDouble("longitude",0);
-                String weatherData = fetchWeatherDataByLocation(latitude,longitude);
+                Log.d(TAG,"CURRENT LOCATION: " + latitude + " , " + longitude);
+                String weatherData = fetchWeatherDataByLocation(latitude+10,longitude);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("key", weatherData);
                 editor.apply();
+                setForegroundAsync(createForegroundInfo(weatherData));
                 break;
             case "weather_cities":
                 Log.d(TAG,"CITIES");
@@ -74,8 +83,73 @@ public class WeatherWorker extends Worker {
         return Result.success();
     }
 
+    private ForegroundInfo createForegroundInfo(String weatherData) {
+        Context context = getApplicationContext();
+        String channelId = "weather_channel";
+        String channelName = "weather_foreground";
+        NotificationManager manager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 123, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-    static String fetchWeatherDataByLocation(double lat, double lon) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new
+                    NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            manager.createNotificationChannel(channel);
+        }
+
+        try {
+            JSONObject jsonObject = new JSONObject(weatherData);
+            String temp = jsonObject.getString("temperature");
+            Integer weather_code = jsonObject.getInt("weathercode");
+            Integer day = jsonObject.getInt("is_day");
+            int icon;
+            String type = null;
+            switch (weather_code) {
+                case 2:
+                    icon = R.drawable.baseline_cloudy;
+                    type = "Cloudy";
+                    break;
+                case 3:
+                    icon = R.drawable.baseline_rainy;
+                    type = "Rainy";
+                    break;
+                case 4:
+                    icon = R.drawable.baseline_thunderstorm;
+                    type = "Thunderstorm";
+                    break;
+                case 5:
+                    icon = R.drawable.baseline_snow;
+                    type = "Snowing";
+                    break;
+                default:
+                    if (day == 1) {
+                        icon = R.drawable.baseline_sunny;
+                        type = "Sunny";
+                    } else {
+                        icon  = R.drawable.baseline_night;
+                        type = "Clear Sky";
+                    }
+            }
+                    Notification notification = new NotificationCompat.Builder(context, channelId)
+                            .setContentTitle("Weather")
+                            .setContentText("Temperture: " + temp)
+                            .setContentText(type)
+                            .setContentIntent(pendingIntent)
+                            .setSmallIcon(icon)
+                            .setOngoing(true)
+                            .build();
+                    manager.notify(1, notification);
+                    Log.d(TAG,"Successfully created a notification");
+                    return new ForegroundInfo(123, notification);
+        } catch (JSONException e) {
+            Log.d(TAG,"Failed to create a notification");
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+        static String fetchWeatherDataByLocation(double lat, double lon) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String weatherJSONString = null;
