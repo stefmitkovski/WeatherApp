@@ -65,15 +65,12 @@ public class MainActivity extends AppCompatActivity {
         final WorkManager mWorkManager = WorkManager.getInstance(getApplication());
 
         // Location
-        SharedPreferences currentLocation = getSharedPreferences("Location Coordinates", Context.MODE_PRIVATE);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         requestLocationUpdates();
 
         // Get the current weather at the users location
         SharedPreferences sharedPreferences = getSharedPreferences("Weather Data", Context.MODE_PRIVATE);
         Data inputData = new Data.Builder().putString("runtype", "weather_location")
-                .putDouble("latitude", currentLocation.getFloat("latitude", (float) 42.004748))
-                .putDouble("longitude", currentLocation.getFloat("longitude",(float)  21.408907))
                 .build();
         workRequestLocation = new PeriodicWorkRequest.Builder(WeatherWorker.class, 15, TimeUnit.MINUTES)
                 .setInputData(inputData)
