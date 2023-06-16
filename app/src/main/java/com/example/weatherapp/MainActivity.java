@@ -47,12 +47,12 @@ public class MainActivity extends AppCompatActivity {
     PeriodicWorkRequest workRequestLocation;
     OneTimeWorkRequest workRequestCities;
     private FusedLocationProviderClient fusedLocationClient;
+    List<String> cities = Arrays.asList("Paris", "London", "Sydney");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        List<String> cities = Arrays.asList("Paris", "London", "Sydney");
 
         mRecyclerView = findViewById(R.id.list_cities);
 
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 String outputValue = sharedPreferences.getString("key", "");
                 if (!outputValue.isEmpty()) {
                     try {
-                        JSONObject jsonObject = new JSONObject(outputValue);
+                        JSONObject jsonObject = new JSONObject(outputValue).getJSONObject("current_weather");
                         String temp = jsonObject.getString("temperature");
                         Double wind_speed = jsonObject.getDouble("windspeed");
                         Integer wind_direction = jsonObject.getInt("winddirection");
@@ -126,10 +126,24 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        WorkManager workManager = WorkManager.getInstance(getApplication());
+        workManager.cancelAllWork();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        WorkManager workManager = WorkManager.getInstance(getApplication());
+        workManager.enqueue(workRequestCities);
+        workManager.enqueue(workRequestLocation);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
     }
 
     private void updateWeather(String temp, Double wind_speed, Integer wind_direction, Integer weather_code, Integer day, String time) {

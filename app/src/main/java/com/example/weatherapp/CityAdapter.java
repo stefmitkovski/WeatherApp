@@ -1,13 +1,12 @@
 package com.example.weatherapp;
 
 import android.content.Context;
-import android.util.Log;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -62,15 +61,13 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
         String entry = cities.get(position);
         holder.city_name.setText(entry);
 
-
         try {
-            JSONObject jsonObject = new JSONObject(data[position]);
+            JSONObject jsonObject = new JSONObject(data[holder.getAdapterPosition()]).getJSONObject("current_weather");
             holder.city_temperature.setText(jsonObject.getString("temperature")+"°");
 
             // Time
             SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-            Date date = null;
-            date = inputFormat.parse(jsonObject.getString("time"));
+            Date date = inputFormat.parse(jsonObject.getString("time"));
             SimpleDateFormat outputFormat = new SimpleDateFormat("HH:mm");
             String timeString = outputFormat.format(date);
             holder.city_last_updated.setText("Last updated on: " + timeString);
@@ -106,11 +103,22 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
             throw new RuntimeException(e);
         }
 
-        holder.city_name.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TextView tv = (TextView) v;
-                Toast.makeText(mContext, tv.getText(), Toast.LENGTH_SHORT).show();
+                try {
+                    Intent intent = new Intent(mContext, CityWeatherActivity.class);
+                    intent.putExtra("name",entry);
+                    JSONObject location = new JSONObject(data[holder.getAdapterPosition()]);
+                    double latitude = location.getDouble("latitude");
+                    double longitude = location.getDouble("longitude");
+                    intent.putExtra("latitude",latitude);
+                    intent.putExtra("longitude",longitude);
+//                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
             }
         });
     }

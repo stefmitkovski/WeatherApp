@@ -100,7 +100,7 @@ public class WeatherWorker extends Worker {
         }
 
         try {
-            JSONObject jsonObject = new JSONObject(weatherData);
+            JSONObject jsonObject = new JSONObject(weatherData).getJSONObject("current_weather");
             String temp = jsonObject.getString("temperature");
             Integer weather_code = jsonObject.getInt("weathercode");
             Integer day = jsonObject.getInt("is_day");
@@ -187,7 +187,7 @@ public class WeatherWorker extends Worker {
                 return null;
             }
 
-            JSONObject jsonObject = new JSONObject(builder.toString()).getJSONObject("current_weather");
+            JSONObject jsonObject = new JSONObject(builder.toString());
             weatherJSONString = jsonObject.toString();
 
         } catch (IOException e) {
