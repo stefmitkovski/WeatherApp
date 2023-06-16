@@ -32,7 +32,7 @@ import java.net.URL;
 
 public class WeatherWorker extends Worker {
 
-    SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Location Weather", Context.MODE_PRIVATE);
+    SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Weather Data", Context.MODE_PRIVATE);
     private static final String TAG = "WEATHER_WORKER";
     private static final String DATABASE_NAME = "cities.db";
     public static final String DATABASE_PATH = "/data/data/com.example.weatherapp/databases/";
@@ -58,7 +58,7 @@ public class WeatherWorker extends Worker {
                 Double latitude = getInputData().getDouble("latitude",0);
                 Double longitude = getInputData().getDouble("longitude",0);
                 Log.d(TAG,"CURRENT LOCATION: " + latitude + " , " + longitude);
-                String weatherData = fetchWeatherDataByLocation(latitude+10,longitude);
+                String weatherData = fetchWeatherDataByLocation(latitude,longitude);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("key", weatherData);
                 editor.apply();
