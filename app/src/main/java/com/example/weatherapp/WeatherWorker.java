@@ -34,7 +34,7 @@ public class WeatherWorker extends Worker {
 
     SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences("Weather Data", Context.MODE_PRIVATE);
     SharedPreferences currentLocation = getApplicationContext().getSharedPreferences("Location Coordinates", Context.MODE_PRIVATE);
-
+    SharedPreferences cityPreferences = getApplicationContext().getSharedPreferences("City Data", Context.MODE_PRIVATE);
     private static final String TAG = "WEATHER_WORKER";
     private static final String DATABASE_NAME = "cities.db";
     public static final String DATABASE_PATH = "/data/data/com.example.weatherapp/databases/";
@@ -65,6 +65,15 @@ public class WeatherWorker extends Worker {
                 editor.putString("key", weatherData);
                 editor.apply();
                 setForegroundAsync(createForegroundInfo(weatherData));
+                break;
+            case "weather_city":
+                latitude = getInputData().getDouble("latitude",42.004748);
+                longitude = getInputData().getDouble("longitude",21.408907);
+                Log.d(TAG,"CITY LOCATION: " + latitude + " , " + longitude);
+                weatherData = fetchWeatherDataByLocation(latitude,longitude);
+                SharedPreferences.Editor city_editor = cityPreferences.edit();
+                city_editor.putString("key",weatherData);
+                city_editor.apply();
                 break;
             case "weather_cities":
                 Log.d(TAG,"CITIES");

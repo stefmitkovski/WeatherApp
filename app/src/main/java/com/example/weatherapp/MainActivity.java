@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         WorkManager workManager = WorkManager.getInstance(getApplication());
-        workManager.cancelAllWork();
+        workManager.cancelUniqueWork("weather_cities");
     }
 
     @Override
@@ -139,11 +139,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         WorkManager workManager = WorkManager.getInstance(getApplication());
         workManager.enqueue(workRequestCities);
-        workManager.enqueue(workRequestLocation);
-    }
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     private void updateWeather(String temp, Double wind_speed, Integer wind_direction, Integer weather_code, Integer day, String time) {
