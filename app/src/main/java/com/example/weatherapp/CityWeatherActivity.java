@@ -11,8 +11,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -37,14 +39,20 @@ public class CityWeatherActivity extends AppCompatActivity {
         TextView city_name = findViewById(R.id.city_name);
         city_name.setText(name);
 
+        // Check for internet connection
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
         final WorkManager mWorkManager = WorkManager.getInstance(getApplication());
         Data inputData = new Data.Builder()
                 .putString("runtype", "weather_city")
-                .putDouble("latitude",0)
-                .putDouble("longitude",0)
+                .putDouble("latitude",getIntent().getDoubleExtra("latitude",0))
+                .putDouble("longitude",getIntent().getDoubleExtra("longitude",0))
                 .build();
         workRequestCity = new PeriodicWorkRequest.Builder(WeatherWorker.class, 15, TimeUnit.MINUTES)
                 .setInputData(inputData)
+                .setConstraints(constraints)
                 .build();
 
         SharedPreferences cityPreferences = getSharedPreferences("City Data", Context.MODE_PRIVATE);

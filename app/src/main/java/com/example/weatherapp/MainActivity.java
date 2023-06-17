@@ -16,9 +16,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.ExistingWorkPolicy;
+import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
@@ -68,12 +70,18 @@ public class MainActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         requestLocationUpdates();
 
+        // Checking for internet connection
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
         // Get the current weather at the users location
         SharedPreferences sharedPreferences = getSharedPreferences("Weather Data", Context.MODE_PRIVATE);
         Data inputData = new Data.Builder().putString("runtype", "weather_location")
                 .build();
         workRequestLocation = new PeriodicWorkRequest.Builder(WeatherWorker.class, 15, TimeUnit.MINUTES)
                 .setInputData(inputData)
+                .setConstraints(constraints)
                 .build();
 
         mWorkManager.enqueueUniquePeriodicWork("weather_location", ExistingPeriodicWorkPolicy.UPDATE, workRequestLocation);
@@ -106,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         inputData = new Data.Builder().putString("runtype", "weather_cities").putString("cities", city_list.toString()).build();
         workRequestCities = new OneTimeWorkRequest.Builder(WeatherWorker.class)
                 .setInputData(inputData)
+                .setConstraints(constraints)
                 .build();
 
         mWorkManager.enqueueUniqueWork("weather_cities", ExistingWorkPolicy.REPLACE, workRequestCities);
