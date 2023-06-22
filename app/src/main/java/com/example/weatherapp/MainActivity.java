@@ -41,23 +41,27 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
-    RecyclerView mRecyclerView;
-    CityAdapter cityAdapter;
-    PeriodicWorkRequest workRequestLocation;
-    OneTimeWorkRequest workRequestCities;
+    private RecyclerView mRecyclerView;
+    private CityAdapter cityAdapter;
+    private PeriodicWorkRequest workRequestLocation;
+    private OneTimeWorkRequest workRequestCities;
     private FusedLocationProviderClient fusedLocationClient;
-    List<String> cities = Arrays.asList("Paris", "London", "Sydney");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ArrayList<String> cities = getIntent().getStringArrayListExtra("cities");
+        if (cities == null) {
+            cities = new ArrayList<>();
+        }
+
+        // Recycle view
         mRecyclerView = findViewById(R.id.list_cities);
 
         mRecyclerView.setHasFixedSize(true);
@@ -120,12 +124,13 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         mWorkManager.enqueueUniqueWork("weather_cities", ExistingWorkPolicy.REPLACE, workRequestCities);
+        ArrayList<String> finalCities1 = cities;
         mWorkManager.getWorkInfosForUniqueWorkLiveData("weather_cities").observe(MainActivity.this, workInfos -> {
             if (workInfos.get(0).getState() == WorkInfo.State.SUCCEEDED) {
                 Data outputData = workInfos.get(0).getOutputData();
                 String[] outputValue = outputData.getStringArray("key");
 
-                cityAdapter = new CityAdapter(cities, R.layout.city_row, this, outputValue);
+                cityAdapter = new CityAdapter(finalCities1, R.layout.city_row, this, outputValue);
 
                 mRecyclerView.setAdapter(cityAdapter);
 
@@ -136,10 +141,12 @@ public class MainActivity extends AppCompatActivity {
 
         // Add button functionality
         ImageButton button = findViewById(R.id.add_city);
+        ArrayList<String> finalCities = cities;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), AddCityActivity.class);
+                intent.putStringArrayListExtra("cities", finalCities);
                 startActivity(intent);
             }
         });

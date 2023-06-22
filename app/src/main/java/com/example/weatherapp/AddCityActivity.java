@@ -21,6 +21,7 @@ public class AddCityActivity extends AppCompatActivity {
     private static final String DATABASE_NAME = "cities.db";
     public static final String DATABASE_PATH = "/data/data/com.example.weatherapp/databases/";
     private static final String TAG = "SEARCH CITY";
+    private static ArrayList<String> cities;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -50,6 +51,7 @@ public class AddCityActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(),MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putStringArrayListExtra("cities",cities);
                 v.getContext().startActivity(intent);
             }
         });
@@ -59,8 +61,9 @@ public class AddCityActivity extends AppCompatActivity {
         SQLiteDatabase database = openDatabase();
 
         // ArrayList
-        ArrayList<String> cityArrayList = new ArrayList<>();
+        ArrayList<String> searchList = new ArrayList<String>();
 
+        ArrayList<String> cityArrayList = getIntent().getStringArrayListExtra("cities");
 
         // Recycle view
         RecyclerView mRecyclerView = findViewById(R.id.list_view);
@@ -78,14 +81,16 @@ public class AddCityActivity extends AppCompatActivity {
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
                 String city = cursor.getString(columnIndex);
-                cityArrayList.add(city);
+                searchList.add(city);
                 cursor.moveToNext();
             }
         }
 
-        SearchAdapter searchAdapter = new SearchAdapter(cityArrayList, R.layout.search_row,this);
+        SearchAdapter searchAdapter = new SearchAdapter(searchList, R.layout.search_row,this, cityArrayList);
 
         mRecyclerView.setAdapter(searchAdapter);
+
+        cities = (ArrayList<String>) searchAdapter.getCitiesList();
 
         closeDatabase(database);
     }
