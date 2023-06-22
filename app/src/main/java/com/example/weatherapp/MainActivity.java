@@ -3,11 +3,14 @@ package com.example.weatherapp;
 import static com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -50,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     OneTimeWorkRequest workRequestCities;
     private FusedLocationProviderClient fusedLocationClient;
     List<String> cities = Arrays.asList("Paris", "London", "Sydney");
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,7 +134,15 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MAIN", workInfos.get(0).getState().toString());
         });
 
-
+        // Add button functionality
+        ImageButton button = findViewById(R.id.add_city);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), AddCityActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
 
