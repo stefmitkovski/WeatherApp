@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -114,6 +115,7 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
                     double longitude = location.getDouble("longitude");
                     intent.putExtra("latitude",latitude);
                     intent.putExtra("longitude",longitude);
+                    intent.putStringArrayListExtra("cities", (ArrayList<String>) getCitiesList());
 //                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     mContext.startActivity(intent);
                 } catch (JSONException e) {
@@ -121,6 +123,10 @@ public class CityAdapter extends RecyclerView.Adapter<CityAdapter.ViewHolder>{
                 }
             }
         });
+    }
+
+    public List<String> getCitiesList() {
+        return cities;
     }
 
     @Override

@@ -85,6 +85,7 @@ public class CityWeatherActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(),MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putStringArrayListExtra("cities",getIntent().getStringArrayListExtra("cities"));
                 v.getContext().startActivity(intent);
             }
         });

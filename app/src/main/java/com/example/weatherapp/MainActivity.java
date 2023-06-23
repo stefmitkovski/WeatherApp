@@ -124,13 +124,13 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         mWorkManager.enqueueUniqueWork("weather_cities", ExistingWorkPolicy.REPLACE, workRequestCities);
-        ArrayList<String> finalCities1 = cities;
+        ArrayList<String> finalCities = cities;
         mWorkManager.getWorkInfosForUniqueWorkLiveData("weather_cities").observe(MainActivity.this, workInfos -> {
             if (workInfos.get(0).getState() == WorkInfo.State.SUCCEEDED) {
                 Data outputData = workInfos.get(0).getOutputData();
                 String[] outputValue = outputData.getStringArray("key");
 
-                cityAdapter = new CityAdapter(finalCities1, R.layout.city_row, this, outputValue);
+                cityAdapter = new CityAdapter(finalCities, R.layout.city_row, this, outputValue);
 
                 mRecyclerView.setAdapter(cityAdapter);
 
@@ -141,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Add button functionality
         ImageButton button = findViewById(R.id.add_city);
-        ArrayList<String> finalCities = cities;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
